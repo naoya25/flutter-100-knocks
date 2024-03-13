@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,32 +48,66 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
+      backgroundColor: Colors.blue[100],
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Flutter Counter',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.grey)),
+                const SizedBox(
+                  height: 30,
+                ),
+                Text(
+                  '$_counter',
+                  style: const TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton(
+                      onPressed: _incrementCounter,
+                      style: TextButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          iconColor: Colors.white,
+                          shape: const CircleBorder()),
+                      child: const Icon(
+                        Icons.add,
+                        size: 10,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _decrementCounter,
+                      style: TextButton.styleFrom(
+                        iconColor: Colors.blue,
+                        shape: const CircleBorder(),
+                        side: const BorderSide(
+                          color: Colors.blue,
+                          width: 2.0,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.remove,
+                        size: 10,
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            FloatingActionButton(
-              onPressed: _incrementCounter,
-              tooltip: '増やす',
-              child: const Icon(Icons.add),
-            ),
-            FloatingActionButton(
-              onPressed: _decrementCounter,
-              tooltip: '減らす',
-              child: const Icon(Icons.remove),
-            ),
-          ],
+          ),
         ),
       ),
     );
