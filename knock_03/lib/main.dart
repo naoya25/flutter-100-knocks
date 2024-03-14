@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:developer';
+import 'package:knock_03/todo.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,40 +37,21 @@ class _MyHomePageState extends State<MyHomePage> {
   final textFieldValue = TextEditingController();
   // 全てのtodoの内容と完了状況を保持する辞書型、API未実装
   // keyがDBのid、valueが[todo内容, 達成状況]っていう想定
-  Map<int, List> todoInfo = {
-    1: ["todo1", false],
-    2: ["todo2", true],
-    3: ["todo3", false],
-    4: ["todo4", false],
-    5: ["todo5", false],
-  };
-
-  // todoが完了した時の処理（チェックボックス）
-  void _toggleAchievement(int key) {
-    setState(() {
-      // チェックボックスが押された時、todoInfoのvalue(配列になってる)の1番目を変更する
-      todoInfo[key]![1] = !todoInfo[key]![1];
-    });
-  }
+  final List<ToDo> todoInfo = [];
 
   // todo追加
   void _addTodo(String taskName) {
     setState(() {
-      final int newKey = todoInfo.keys.isEmpty
-          ? 1
-          : todoInfo.keys.reduce(
-                  (value, element) => value > element ? value : element) +
-              1;
-      todoInfo[newKey] = [taskName, false];
-      log("taskName");
-      log(taskName);
+      final newTodo = ToDo(title: taskName);
+      todoInfo.add(newTodo);
+      log("taskName: $taskName");
     });
   }
 
   // todo削除
-  void _deleteTodo(int key) {
+  void _deleteTodo(ToDo todo) {
     setState(() {
-      todoInfo.remove(key);
+      todoInfo.remove(todo);
     });
   }
 
@@ -82,24 +64,24 @@ class _MyHomePageState extends State<MyHomePage> {
         child: ListView.builder(
             itemCount: todoInfo.length,
             itemBuilder: (_, i) {
-              final key = todoInfo.keys.elementAt(i);
-              final value = todoInfo[key];
               return ListTile(
                 leading: Checkbox(
-                  value: value?[1],
+                  value: todoInfo[i].isDone,
                   onChanged: (bool? newValue) {
-                    _toggleAchievement(key);
+                    setState(() {
+                      todoInfo[i].toggleDone();
+                    });
                   },
                 ),
-                title: Text('${value?[0]}'),
+                title: Text(todoInfo[1].title),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
-                  onPressed: () => _deleteTodo(key),
+                  onPressed: () => _deleteTodo(todoInfo[i]),
                 ),
               );
             }),
       )),
-      floatingActionButton: TextButton(
+      floatingActionButton: FloatingActionButton(
         // ボタンクリックでモーダルウィンド表示
         onPressed: () => showDialog(
             context: context,
