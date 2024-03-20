@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                   },
                 ),
-                title: Text(todoInfo[1].title),
+                title: Text(todoInfo[i].title),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () => _deleteTodo(todoInfo[i]),
