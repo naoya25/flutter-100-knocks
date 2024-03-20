@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 void main() {
   runApp(const MyApp());
@@ -32,11 +34,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late Timer _timer;
   bool _isRunning = false;
+  // 時間、分、秒のそれぞれのテキストフィールドの値管理用
   final TextEditingController _hoursController = TextEditingController();
   final TextEditingController _minutesController = TextEditingController();
   final TextEditingController _secondsController = TextEditingController();
 
   late DateTime _timerValue;
+  late double _percentage = 1;
 
   @override
   void initState() {
@@ -46,6 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // スタートボタンが押された時の処理
+  // 毎秒カウントダウンする処理も入ってる
   void _startTimer() {
     // 毎秒処理する
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -59,12 +64,25 @@ class _MyHomePageState extends State<MyHomePage> {
           } else {
             // -1秒する
             _timerValue = _timerValue.subtract(const Duration(seconds: 1));
+            int hours = int.parse(_hoursController.text);
+            int minutes = int.parse(_minutesController.text);
+            int seconds = int.parse(_secondsController.text);
+
+            log("$hours: $minutes: $seconds  ${_timerValue.hour}: ${_timerValue.minute}: ${_timerValue.second}");
+            // ミリ秒表示してパーセンテージを計算
+            int startTime = hours * 60 * 60 + minutes * 60 + seconds;
+            int nowTime = _timerValue.hour * 60 * 60 +
+                _timerValue.minute * 60 +
+                _timerValue.second;
+            _percentage = nowTime / startTime;
+            log("%: $_percentage");
           }
         });
       }
     });
   }
 
+  // リセットボタンが押された時の処理
   void _resetTimer() {
     _timer.cancel();
     setState(() {
@@ -73,6 +91,18 @@ class _MyHomePageState extends State<MyHomePage> {
       _hoursController.clear();
       _minutesController.clear();
       _secondsController.clear();
+    });
+  }
+
+  // 入力欄からタイマーをセットする`
+  void _setTimer() {
+    setState(() {
+      int hours = int.parse(_hoursController.text);
+      int minutes = int.parse(_minutesController.text);
+      int seconds = int.parse(_secondsController.text);
+      _timerValue = DateTime(0, 0, 0, hours, minutes, seconds);
+      _isRunning = true;
+      Navigator.pop(context);
     });
   }
 
@@ -91,13 +121,14 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextButton(
-                  // 数字部分をクリックするとタイマー編集用のモーダルウィンド表示
+                  // モーダルウィンド表示
                   onPressed: () => showDialog(
                       context: context,
                       builder: (content) => AlertDialog(
                             content: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                // 時、分、秒の入力欄
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -136,20 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ],
                                 ),
                                 TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        int hours =
-                                            int.parse(_hoursController.text);
-                                        int minutes =
-                                            int.parse(_minutesController.text);
-                                        int seconds =
-                                            int.parse(_secondsController.text);
-                                        _timerValue = DateTime(
-                                            0, 0, 0, hours, minutes, seconds);
-                                        _isRunning = true;
-                                        Navigator.pop(context);
-                                      });
-                                    },
+                                    onPressed: _setTimer,
                                     child: const Text('完了'))
                               ],
                             ),
@@ -159,6 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     "${_timerValue.hour}:${_timerValue.minute}:${_timerValue.second}",
                   ),
                 ),
+                // ボタン3つ横並び（スタート、一時停止、リセット）
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -184,11 +203,46 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ],
                 ),
+                // 円形のカウントダウンバー表示
+                CustomPaint(
+                  size: const Size(0, 100),
+                  painter: _CirclePainter(_percentage), // percentageは 0~1 の間
+                )
               ],
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+// 円形描画
+class _CirclePainter extends CustomPainter {
+  final double percentage;
+  _CirclePainter(this.percentage);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const double strokeWidth = 20.0;
+    const double radius = 100;
+    final Offset center = Offset(size.width / 2, size.height / 2);
+
+    Paint arcPaint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      math.pi * 1.5, // 開始角度（0時の方向）
+      2 * math.pi * percentage, // 描画する弧の長さ
+      false,
+      arcPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
   }
 }
