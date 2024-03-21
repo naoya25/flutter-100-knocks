@@ -33,7 +33,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late Timer _timer;
-  bool _isRunning = false;
   // 時間、分、秒のそれぞれのテキストフィールドの値管理用
   final TextEditingController _hoursController = TextEditingController();
   final TextEditingController _minutesController = TextEditingController();
@@ -52,47 +51,42 @@ class _MyHomePageState extends State<MyHomePage> {
   // スタートボタンが押された時の処理
   // 毎秒カウントダウンする処理も入ってる
   void _startTimer() {
-    _isRunning = true;
     // 毎秒処理する
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_isRunning) {
-        setState(() {
-          if (_timerValue.hour == 0 &&
-              _timerValue.minute == 0 &&
-              _timerValue.second == 0) {
-            _isRunning = false;
-            _timer.cancel();
-          } else {
-            // -1秒する
-            _timerValue = _timerValue.subtract(const Duration(seconds: 1));
-            log("$_timerValue");
+      setState(() {
+        if (_timerValue.hour == 0 &&
+            _timerValue.minute == 0 &&
+            _timerValue.second == 0) {
+          _timer.cancel();
+        } else {
+          // -1秒する
+          _timerValue = _timerValue.subtract(const Duration(seconds: 1));
+          log("$_timerValue");
 
-            // 秒表示してパーセンテージを計算
-            int hours = _hoursController.text.isNotEmpty
-                ? int.parse(_hoursController.text)
-                : 0;
-            int minutes = _minutesController.text.isNotEmpty
-                ? int.parse(_minutesController.text)
-                : 0;
-            int seconds = _secondsController.text.isNotEmpty
-                ? int.parse(_secondsController.text)
-                : 0;
+          // 秒表示してパーセンテージを計算
+          int hours = _hoursController.text.isNotEmpty
+              ? int.parse(_hoursController.text)
+              : 0;
+          int minutes = _minutesController.text.isNotEmpty
+              ? int.parse(_minutesController.text)
+              : 0;
+          int seconds = _secondsController.text.isNotEmpty
+              ? int.parse(_secondsController.text)
+              : 0;
 
-            int startTime = hours * 60 * 60 + minutes * 60 + seconds;
-            int nowTime = _timerValue.hour * 60 * 60 +
-                _timerValue.minute * 60 +
-                _timerValue.second;
-            _percentage = nowTime / startTime;
-          }
-        });
-      }
+          int startTime = hours * 60 * 60 + minutes * 60 + seconds;
+          int nowTime = _timerValue.hour * 60 * 60 +
+              _timerValue.minute * 60 +
+              _timerValue.second;
+          _percentage = nowTime / startTime;
+        }
+      });
     });
   }
 
   // 一時停止ボタンが押された時
   void _pauseTimer() {
     setState(() {
-      _isRunning = false;
       _timer.cancel(); // 二重で_timerが動くのを避けるため
     });
   }
@@ -101,7 +95,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void _resetTimer() {
     _timer.cancel();
     setState(() {
-      _isRunning = false; // 停止
       int hours = _hoursController.text.isNotEmpty
           ? int.parse(_hoursController.text)
           : 0;
